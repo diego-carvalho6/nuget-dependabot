@@ -13,21 +13,21 @@ public static class Startup
     {
         ParserResult<ActionInputs> parser = Default.ParseArguments<ActionInputs>(() => new(), args);
 
-        parser.WithNotParsed(
-            errors =>
-            {
-                foreach (var error in errors)
-                {
-                    // todo enhance this
-                    Console.WriteLine($"error: {error}");
-                }
-                
-                Environment.Exit(2);
-            });
+        // parser.WithNotParsed(
+        //     errors =>
+        //     {
+        //         foreach (var error in errors)
+        //         {
+        //             // todo enhance this
+        //             Console.WriteLine($"error: {error}");
+        //         }
+        //         
+        //         Environment.Exit(2);
+        //     });
 
         services.Configure<NugetOptions>(options =>
         {
-            options.ConfigureOptions(parser?.Value?.NugetSource, parser?.Value?.Username, parser?.Value?.Password);
+            options.ConfigureOptions(parser?.Value?.NugetSource, Environment.GetEnvironmentVariable("USERNAME"), Environment.GetEnvironmentVariable("PASSWORD"));
         });
 
         services.AddSingleton<NugetPackageService>();
