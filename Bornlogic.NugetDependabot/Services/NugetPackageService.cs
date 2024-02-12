@@ -12,14 +12,14 @@ public class NugetPackageService
 {
     private readonly List<Package> _packages;
     private readonly NugetOptions _nugetOptions;
-    private readonly ILogger _logger;
+    private readonly ILogger<NugetPackageService> _logger;
     
     private readonly Regex _itemGroupRegex = new ("(?s)(?<=<itemgroup>).*?(?=<\\/itemgroup)>");
     private readonly Regex _packageReferenceRegex = new ("(<packagereference).+?(\\/>)");
     private readonly Regex _invalidValuesToRemove = new Regex("(\\\u0022)");
     private static readonly HttpClient Client = new HttpClient();
 
-    public NugetPackageService(IOptions<NugetOptions> nugetOptions, ILogger logger)
+    public NugetPackageService(IOptions<NugetOptions> nugetOptions, ILogger<NugetPackageService> logger)
     {
         _logger = logger;
         _nugetOptions = nugetOptions.Value;

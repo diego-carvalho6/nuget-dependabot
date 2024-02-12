@@ -25,6 +25,8 @@ public static class Startup
         //         Environment.Exit(2);
         //     });
 
+        services.AddLogging();
+        
         services.Configure<NugetOptions>(options =>
         {
             options.ConfigureOptions(parser?.Value?.NugetSource, Environment.GetEnvironmentVariable("USERNAME"), Environment.GetEnvironmentVariable("PASSWORD"));

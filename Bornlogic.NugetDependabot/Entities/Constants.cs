@@ -8,7 +8,8 @@ public static class Constants
     public const string DefaultSpecsDataSeparator = "=";
     public const string DefaultNugetSource = "https://api.nuget.org/v3/";
     public const string DefaultUrlSlash = "/";
-    public const string DefaultDirectory = "/";
+    public const string DefaultHiddenDirectoryPrefix = ".";
+    public const string DefaultDirectory = "/home/diego/RiderProjects/ActionDependencies";
     public const string DefaultIndexJsonValue = "index.json";
     public const string BasicHeader = "Basic ";
     public const string AuthorizationHeader = "Authorization";

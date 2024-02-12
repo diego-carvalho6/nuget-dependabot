@@ -3,9 +3,12 @@ using Bornlogic.NugetDependabot.Entities;
 using Bornlogic.NugetDependabot.Services;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
 
 HostApplicationBuilder builder = Host.CreateApplicationBuilder(args);
 
+builder.Logging.ClearProviders();
+builder.Logging.AddConsole();
 builder.Services.ConfigureServices(args);
 
 using IHost host = builder.Build();
@@ -16,8 +19,10 @@ await host.RunAsync();
 static async Task FindDirectoriesAndUpdatePackages(string path,  IHost host)
 {
     var directories = Directory.GetDirectories(path);
-        
-    foreach (var directory in directories)
+
+    var publicDirectories = directories.Where(x => !x.Split(Constants.DefaultUrlSlash)?.LastOrDefault().StartsWith(Constants.DefaultHiddenDirectoryPrefix) ?? false);
+    
+    foreach (var directory in publicDirectories)
         await FindDirectoriesAndUpdatePackages(directory, host);
         
     var files = Directory.GetFiles(path);
