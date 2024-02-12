@@ -1,4 +1,4 @@
-namespace Bornlogic.NugetDependabot.Entities;
+namespace Bornlogic.NugetDependabot.Entities.Extensions;
 
 public static class NugetParser
 {

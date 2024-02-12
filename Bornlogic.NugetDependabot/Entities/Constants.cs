@@ -10,7 +10,7 @@ public static class Constants
     public const string DefaultNugetRegistry = "registration5-gz-semver2";
     public const string DefaultUrlSlash = "/";
     public const string DefaultHiddenDirectoryPrefix = ".";
-    public const string DefaultDirectory = "/home/diego/RiderProjects/ActionDependencies";
+    public const string DefaultDirectory = "/";
     public const string DefaultIndexJsonValue = "index.json";
     public const string BasicHeader = "Basic ";
     public const string AuthorizationHeader = "Authorization";

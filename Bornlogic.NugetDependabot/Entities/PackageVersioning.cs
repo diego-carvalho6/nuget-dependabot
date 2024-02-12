@@ -6,7 +6,7 @@ internal class PackageVersioning
     internal int? MajorVersion { get; set; }
     internal int? MinorVersion { get; set; }
     internal int? PatchVersion { get; set; }
-    internal int? ParseVersion { get; set; }
+    internal int? ParsedVersion { get; set; }
     internal string Version { get; set; }
     
     internal PackageVersioning(string version)
@@ -20,15 +20,13 @@ internal class PackageVersioning
         MinorVersion = int.TryParse(splitedValues.ElementAtOrDefault(1), out var secondValue) ? secondValue : null;
         PatchVersion = int.TryParse(splitedValues.ElementAtOrDefault(2), out var thirdValue) ? thirdValue : null;
         Version = version;
-        var parseVersion = MajorVersion;
+        ParsedVersion = MajorVersion;
         
         if (MinorVersion != null)
-            parseVersion *= DefaultVersionMultiplier + MinorVersion;
+            ParsedVersion = ParsedVersion * DefaultVersionMultiplier + MinorVersion;
         
         if (PatchVersion != null)
-            parseVersion *= DefaultVersionMultiplier + PatchVersion;
-
-        ParseVersion = parseVersion;
-
+            ParsedVersion = ParsedVersion * DefaultVersionMultiplier + PatchVersion;
+        
     }
 }
