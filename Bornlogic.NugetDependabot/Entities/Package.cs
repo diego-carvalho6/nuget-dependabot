@@ -36,7 +36,9 @@ public class Package
     {
         // todo introduce custom configurations, example, update only minor
         
-        return PackageNugetVersion ?? PackageVersion;
-        
+        return string.IsNullOrWhiteSpace(PackageNugetVersion) ? PackageVersion :  PackageNugetVersion;
     }
+
+    internal bool HasUpdate() =>
+        !string.IsNullOrWhiteSpace(PackageNugetVersion) && PackageNugetVersion ! != PackageVersion;
 }

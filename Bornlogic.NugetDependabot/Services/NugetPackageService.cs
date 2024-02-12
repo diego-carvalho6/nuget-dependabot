@@ -1,3 +1,6 @@
+using System.Net;
+using System.Net.Http.Headers;
+using System.Net.Http.Json;
 using System.Text;
 using System.Text.RegularExpressions;
 using Bornlogic.NugetDependabot.Entities;
@@ -15,9 +18,12 @@ public class NugetPackageService
     private readonly ILogger<NugetPackageService> _logger;
     
     private readonly Regex _itemGroupRegex = new ("(?s)(?<=<itemgroup>).*?(?=<\\/itemgroup)>");
-    private readonly Regex _packageReferenceRegex = new ("(<packagereference).+?(\\/>)");
+    private readonly Regex _packageReferenceRegex = new ("(<packagereference).+?(\\/>)", RegexOptions.IgnoreCase);
     private readonly Regex _invalidValuesToRemove = new Regex("(\\\u0022)");
-    private static readonly HttpClient Client = new HttpClient();
+    private static readonly HttpClient Client = new HttpClient( new HttpClientHandler()
+    {
+        AutomaticDecompression = DecompressionMethods.All
+    });
 
     public NugetPackageService(IOptions<NugetOptions> nugetOptions, ILogger<NugetPackageService> logger)
     {
@@ -26,12 +32,12 @@ public class NugetPackageService
         _packages = new List<Package>();
     }
     
-    public async Task<string> UpdatePackagesInFile(string fileContent)
+    public async Task<string> UpdatePackagesInFile(string fileContent, string fileName)
     {
         var references = new List<string>();
         var packages = new List<Package>();
         
-        var itemGroups = _itemGroupRegex.Matches(fileContent);
+        var itemGroups = fileContent.Split("\n");
         foreach (var itemGroup in itemGroups)
             references.AddRange(_packageReferenceRegex.Matches(itemGroup?.ToString() ?? string.Empty).Select(x => x.ToString()));
 
@@ -43,6 +49,11 @@ public class NugetPackageService
         foreach (var package in packages)
         foreach (var packageReference in package.GetSavedPackageReferences())
             sbContent.Replace(packageReference, package.ToNugetPackageReference());
+        
+        _logger.LogInformation($" ");
+        _logger.LogInformation(packages.Any(x => x.HasUpdate())
+            ? $"Conclude update in file {fileName} \nUpdated Packages: /n {string.Join("/n", packages.Select(x => x.GetPackageName()))}"
+            : $"Conclude update in file {fileName} \nNo Packages Updated \n");
         
         return sbContent.ToString();
     }
@@ -75,7 +86,7 @@ public class NugetPackageService
             return savedPackage;
         }
     
-        var nugetPackageVersion = await TryFindNugetPackageVersion(parsedInclude);
+        var nugetPackageVersion = await TryFindNugetPackageLastVersion(parsedInclude);
 
         var newPackage = new Package(value, parsedInclude, parsedVersion, nugetPackageVersion);
     
@@ -86,40 +97,67 @@ public class NugetPackageService
         return newPackage;
     }
 
-    private async Task<string> TryFindNugetPackageVersion(string packageName)
+    private async Task<string> TryFindNugetPackageLastVersion(string packageName)
     {
         try
         {
-            var currentSourceUrl = $"{_nugetOptions.GetNugetSource().Clone()}{packageName}{Constants.DefaultUrlSlash}{Constants.DefaultIndexJsonValue}";
+            var isDefaultSource = _nugetOptions.GetNugetSource().Equals(Constants.DefaultNugetSource);
             
-            _logger.LogInformation($"GET Reference: {currentSourceUrl} \n");
-            
-            using HttpRequestMessage requestMessage = new HttpRequestMessage(HttpMethod.Get, currentSourceUrl);
-            
-            if (!string.IsNullOrWhiteSpace(_nugetOptions.GetBasicAuth()))
-                requestMessage.Headers.Add(Constants.AuthorizationHeader, Constants.BasicHeader + _nugetOptions.GetBasicAuth());
-            
-            using HttpResponseMessage response = await Client.SendAsync(requestMessage);
-            response.EnsureSuccessStatusCode();
-            
-            string responseBody = await response.Content.ReadAsStringAsync();
-            
-            var nugetResponse = JsonConvert.DeserializeObject<NugetListResponse>(responseBody);
-            
-            var lastReference = nugetResponse?.Items?.FirstOrDefault()?.Upper;
-            
-            if (!string.IsNullOrWhiteSpace(lastReference))
-                _logger.LogInformation($"GET Success.  Last Reference: {lastReference} \n\n");
-            else
-                _logger.LogInformation($"GET Success. Not Found Last Reference \n\n");
-            
-            return lastReference;
+            return isDefaultSource ? await GetLastReferenceInPublicNugetSource(packageName) :await GetLastReferenceInPrivateNugetSource(packageName);
         }
         catch (HttpRequestException e)
         {
-            _logger.LogError($"\nException Caught! \n Message :{e.Message} \n\n ");
+            _logger.LogError($"\n Get Failure. \n Error Message :{e.Message} \n\n ");
         }
         
         return string.Empty;
+    }
+
+    private async Task<string> GetLastReferenceInPrivateNugetSource(string packageName)
+    {
+        var currentSourceUrl = $"{_nugetOptions.GetNugetSource().Clone()}{packageName}{Constants.DefaultUrlSlash}{Constants.DefaultIndexJsonValue}".ToLower();
+            
+        _logger.LogInformation($"GET Reference: {currentSourceUrl} In Private Source.\n");
+
+        return await FindLastReferenceInNugetSource(currentSourceUrl,  _nugetOptions.GetBasicAuth(),
+            "Not Found Package Reference In Private Source Trying To Search In Public Source.\n",
+            () => GetLastReferenceInPublicNugetSource(packageName));
+    }
+    private async Task<string> GetLastReferenceInPublicNugetSource(string packageName)
+    {
+        var currentSourceUrl = $"{Constants.DefaultNugetSource}{Constants.DefaultNugetRegistry}{Constants.DefaultUrlSlash}{packageName}{Constants.DefaultUrlSlash}{Constants.DefaultIndexJsonValue}".ToLower();
+            
+        _logger.LogInformation($"GET Reference: {currentSourceUrl} In Public Source\n");
+
+        return await FindLastReferenceInNugetSource(currentSourceUrl);
+    }
+
+    private async Task<string> FindLastReferenceInNugetSource(string sourceUrl, string authorization = null, string notFoundFallbackMessage = null, Func<Task<string>> notFoundAction = null)
+    {
+        using HttpRequestMessage requestMessage = new HttpRequestMessage(HttpMethod.Get, sourceUrl);
+            
+        if (!string.IsNullOrWhiteSpace(authorization))
+            requestMessage.Headers.Authorization = new AuthenticationHeaderValue(Constants.BasicHeader, authorization);
+
+        using HttpResponseMessage response = await Client.SendAsync(requestMessage);
+        
+        if (response?.StatusCode == HttpStatusCode.NotFound && notFoundAction != null)
+        {
+            _logger.LogError($"{notFoundFallbackMessage}");
+            return await notFoundAction.Invoke();
+        }
+        
+        response.EnsureSuccessStatusCode();
+            
+        var responseBody =  JsonConvert.DeserializeObject<NugetListResponse>((await response.Content.ReadAsStringAsync()) ?? string.Empty);
+
+        var lastReference = NugetParser.ReturnGreater(responseBody?.Items?.Select(x => x?.Upper));
+            
+        if (!string.IsNullOrWhiteSpace(lastReference))
+            _logger.LogInformation($"GET Success. {sourceUrl} Last Reference: {lastReference} \n\n");
+        else
+            _logger.LogInformation($"GET Success. {sourceUrl} Not Found Last Reference \n\n");
+
+        return lastReference;
     }
 }

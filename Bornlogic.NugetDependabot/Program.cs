@@ -38,7 +38,7 @@ static async Task ProcessNugetFileUpdate(string path,  IHost host)
     
     var allContent = await File.ReadAllTextAsync(path);
     
-    var newContent = await (Get<NugetPackageService>(host)?.UpdatePackagesInFile(allContent) ??  Task.FromResult(allContent));
+    var newContent = await (Get<NugetPackageService>(host)?.UpdatePackagesInFile(allContent, path.Split(Constants.DefaultUrlSlash).LastOrDefault()) ??  Task.FromResult(allContent));
 
     await File.WriteAllTextAsync(path, newContent);
 }
