@@ -21,10 +21,8 @@ outputs:
   updated-metrics:
     description: 'A boolean value, indicating whether or not the CODE_METRICS.md was updated as a result of running this action.'
 runs:
-  env:
-    WORKDIR: Bornlogic.NugetDependabot
   using: 'docker'
-  image: $WORKDIR/Dockerfile
+  image:  Bornlogic.NugetDependabot/Dockerfile
   args:
     - '-n'
     - ${{ inputs.username }}
