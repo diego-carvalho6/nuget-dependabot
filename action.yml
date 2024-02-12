@@ -24,7 +24,7 @@ runs:
   env:
     WORKDIR: Bornlogic.NugetDependabot
   using: 'docker'
-  image: $WORKDIR/Dockerfile .
+  image: $WORKDIR/Dockerfile
   args:
     - '-n'
     - ${{ inputs.username }}
