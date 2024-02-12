@@ -11,9 +11,8 @@ public class Package
     private string PackageName { get; set; }
     private string PackageVersion { get; set; }
     private string PackageNugetVersion { get; set; }
-
     
-    private Package()
+    internal Package()
     {
         
     }
@@ -34,11 +33,9 @@ public class Package
     internal string GetPackageName() => PackageName;
     private string GetVersionByConfiguration()
     {
-        // todo introduce custom configurations, example, update only minor
-        
         return string.IsNullOrWhiteSpace(PackageNugetVersion) ? PackageVersion :  PackageNugetVersion;
     }
 
     internal bool HasUpdate() =>
-        !string.IsNullOrWhiteSpace(PackageNugetVersion) && PackageNugetVersion ! != PackageVersion;
+        !string.IsNullOrWhiteSpace(PackageNugetVersion) && PackageNugetVersion != PackageVersion;
 }

@@ -17,7 +17,6 @@ public class NugetPackageService
     private readonly NugetOptions _nugetOptions;
     private readonly ILogger<NugetPackageService> _logger;
     
-    private readonly Regex _itemGroupRegex = new ("(?s)(?<=<itemgroup>).*?(?=<\\/itemgroup)>");
     private readonly Regex _packageReferenceRegex = new ("(<packagereference).+?(\\/>)", RegexOptions.IgnoreCase);
     private readonly Regex _invalidValuesToRemove = new Regex("(\\\u0022)");
     private static readonly HttpClient Client = new HttpClient( new HttpClientHandler()
@@ -46,11 +45,10 @@ public class NugetPackageService
         
         var sbContent = new StringBuilder(fileContent);
 
-        foreach (var package in packages)
+        foreach (var package in packages.Where(x => x.HasUpdate()))
         foreach (var packageReference in package.GetSavedPackageReferences())
             sbContent.Replace(packageReference, package.ToNugetPackageReference());
         
-        _logger.LogInformation($" ");
         _logger.LogInformation(packages.Any(x => x.HasUpdate())
             ? $"Conclude update in file {fileName} \nUpdated Packages: /n {string.Join("/n", packages.Select(x => x.GetPackageName()))}"
             : $"Conclude update in file {fileName} \nNo Packages Updated \n");
@@ -69,11 +67,14 @@ public class NugetPackageService
             ?.Split(Constants.DefaultSpecsDataSeparator)?.LastOrDefault();
 
         if (string.IsNullOrWhiteSpace(includeValue) || string.IsNullOrWhiteSpace(versionValue))
-            return default;
+            return new Package();
         
         var parsedVersion = _invalidValuesToRemove.Replace(versionValue, string.Empty);
         var parsedInclude = _invalidValuesToRemove.Replace(includeValue, string.Empty);
 
+        if (!IsAllowedPackage(includeValue))
+            return new Package();
+        
         var semaphore = new SemaphoreSlim(1, 1);
 
         await semaphore.WaitAsync();
@@ -95,6 +96,20 @@ public class NugetPackageService
         semaphore.Release();
     
         return newPackage;
+    }
+
+    private bool IsAllowedPackage(string packageName)
+    {
+        if (!_nugetOptions.GetAllowedPackages().Any())
+            return true;
+
+        var result = false;
+
+        return _nugetOptions.GetAllowedPackages().Any(x =>
+            x.EndsWith(Constants.DefaultWildCardValue)
+                ? packageName.StartsWith(x.Replace(Constants.DefaultWildCardValue, string.Empty),
+                    StringComparison.InvariantCultureIgnoreCase)
+                : x.Equals(packageName, StringComparison.InvariantCultureIgnoreCase));
     }
 
     private async Task<string> TryFindNugetPackageLastVersion(string packageName)
