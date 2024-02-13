@@ -7,12 +7,12 @@ COPY ["Bornlogic.NugetDependabot/Bornlogic.NugetDependabot.csproj", "Bornlogic.N
 RUN dotnet restore "Bornlogic.NugetDependabot/Bornlogic.NugetDependabot.csproj"
 COPY . .
 WORKDIR "/Bornlogic.NugetDependabot"
-RUN dotnet build "Bornlogic.NugetDependabot.csproj" -c $BUILD_CONFIGURATION -o /build
+RUN dotnet build "Bornlogic.NugetDependabot.csproj" -c $BUILD_CONFIGURATION -o github/workspace/build
 
 FROM build AS publish
 ARG BUILD_CONFIGURATION=Release
-RUN dotnet publish "Bornlogic.NugetDependabot.csproj" -c $BUILD_CONFIGURATION -o /publish --no-self-contained
+RUN dotnet publish "Bornlogic.NugetDependabot.csproj" -c $BUILD_CONFIGURATION -o github/workspace/publish --no-self-contained
 
 FROM base AS final
-COPY --from=publish /publish .
+COPY --from=publish github/workspace/publish .
 ENTRYPOINT ["dotnet", "Bornlogic.NugetDependabot.dll"]
