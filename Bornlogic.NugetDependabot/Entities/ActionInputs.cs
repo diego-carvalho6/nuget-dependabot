@@ -23,6 +23,10 @@ public class ActionInputs
         get => _allowedSources;
         set => ParseAndAssign(value, str => _allowedSources = str);
     }
+    [Option('w', "workspace",
+        Required = true,
+        HelpText = "The workspace directory, or repository root directory.")]
+    public string WorkspaceDirectory { get; set; } = null!;
     
     static void ParseAndAssign(string? value, Action<string> assign)
     {
