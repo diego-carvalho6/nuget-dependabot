@@ -9,7 +9,6 @@ public static class Constants
     public const string DefaultNugetSource = "https://api.nuget.org/v3/";
     public const string DefaultNugetRegistry = "registration5-gz-semver2";
     public const string DefaultUrlSlash = "/";
-    public const string DefaultHiddenDirectoryPrefix = ".";
     public const string DefaultDirectory = "/";
     public const string DefaultIndexJsonValue = "index.json";
     public const string DefaultAllowedSeparator = "|";
