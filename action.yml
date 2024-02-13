@@ -10,6 +10,10 @@ inputs:
   allowed-sources:
     description: 'The Nuget Packages Allowed Split By | , for example: \"microsoft*|MarkdownBuilder|aws-sdk*\'
     required: false
+  workspace:
+    description: 'The workspace directory.'
+    required: false
+    default: '/github/workspace'
 outputs:
   summary-title:
     description: 'The title of the code metrics action.'
@@ -25,3 +29,5 @@ runs:
     - ${{ inputs.nuget-source }}
     - '-a'
     - ${{ inputs.allowed-sources }}
+    - '-w'
+    - ${{ inputs.workspace }}

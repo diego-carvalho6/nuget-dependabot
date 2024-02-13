@@ -17,5 +17,5 @@ RUN dotnet publish "Bornlogic.NugetDependabot.csproj" -c $BUILD_CONFIGURATION -o
 
 FROM base AS final
 WORKDIR /app
-COPY --from=publish /app/publish /github/workspace
+COPY --from=publish /app/publish .
 ENTRYPOINT ["dotnet", "Bornlogic.NugetDependabot.dll"]
