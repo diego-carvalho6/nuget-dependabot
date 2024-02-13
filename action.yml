@@ -13,7 +13,7 @@ inputs:
   workspace:
     description: 'The workspace directory.'
     required: false
-    default: '/github/workspace'
+    default: '/'
 outputs:
   summary-title:
     description: 'The title of the code metrics action.'
