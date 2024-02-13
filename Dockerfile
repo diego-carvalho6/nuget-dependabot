@@ -5,7 +5,7 @@ WORKDIR /app
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 ARG BUILD_CONFIGURATION=Release
 WORKDIR /src
-COPY ["Bornlogic.NugetDependabot.csproj", "Bornlogic.NugetDependabot/"]
+COPY ["Bornlogic.NugetDependabot/Bornlogic.NugetDependabot.csproj", "Bornlogic.NugetDependabot/"]
 RUN dotnet restore "Bornlogic.NugetDependabot/Bornlogic.NugetDependabot.csproj"
 COPY . .
 WORKDIR "/src/Bornlogic.NugetDependabot"
