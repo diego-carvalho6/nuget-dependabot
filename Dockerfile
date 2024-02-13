@@ -14,5 +14,6 @@ ARG BUILD_CONFIGURATION=Release
 RUN dotnet publish "Bornlogic.NugetDependabot.csproj" -c $BUILD_CONFIGURATION -o github/workspace/publish --no-self-contained
 
 FROM base AS final
+WORKDIR github/workspace
 COPY --from=publish github/workspace/publish .
 ENTRYPOINT ["dotnet", "Bornlogic.NugetDependabot.dll"]
