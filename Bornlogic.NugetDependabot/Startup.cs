@@ -12,19 +12,7 @@ public static class Startup
     public static IServiceCollection ConfigureServices(this IServiceCollection services, string[] args)
     {
         ParserResult<ActionInputs> parser = Default.ParseArguments<ActionInputs>(() => new(), args);
-
-        // parser.WithNotParsed(
-        //     errors =>
-        //     {
-        //         foreach (var error in errors)
-        //         {
-        //             // todo enhance this
-        //             Console.WriteLine($"error: {error}");
-        //         }
-        //         
-        //         Environment.Exit(2);
-        //     });
-
+        
         services.AddLogging();
         
         services.Configure<NugetOptions>(options =>

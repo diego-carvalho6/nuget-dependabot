@@ -5,54 +5,47 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 
-public class Program()
+HostApplicationBuilder builder = Host.CreateApplicationBuilder(args);
+
+builder.Logging.ClearProviders();
+builder.Logging.AddConsole();
+builder.Services.ConfigureServices(args);
+
+using IHost host = builder.Build();
+
+await FindDirectoriesAndUpdatePackages(Constants.DefaultDirectory, host);
+await host.RunAsync();
+
+static async Task FindDirectoriesAndUpdatePackages(string path,  IHost host)
 {
-    public static async Task Main(string[] args)
-    {
-        HostApplicationBuilder builder = Host.CreateApplicationBuilder(args);
+    var directories = Directory.GetDirectories(path);
 
-        builder.Logging.ClearProviders();
-        builder.Logging.AddConsole();
-        builder.Services.ConfigureServices(args);
-
-        using IHost host = builder.Build();
-
-        await FindDirectoriesAndUpdatePackages(Constants.DefaultDirectory, host);
-        await host.RunAsync();
-
-        static async Task FindDirectoriesAndUpdatePackages(string path,  IHost host)
-        {
-            var directories = Directory.GetDirectories(path);
-
-            var publicDirectories = directories.Where(x => !x.Split(Constants.DefaultUrlSlash)?.LastOrDefault().StartsWith(Constants.DefaultHiddenDirectoryPrefix) ?? false);
+    var publicDirectories = directories.Where(x => !x.Split(Constants.DefaultUrlSlash)?.LastOrDefault().StartsWith(Constants.DefaultHiddenDirectoryPrefix) ?? false);
     
-            foreach (var directory in publicDirectories)
-                await FindDirectoriesAndUpdatePackages(directory, host);
+    foreach (var directory in publicDirectories)
+        await FindDirectoriesAndUpdatePackages(directory, host);
         
-            var files = Directory.GetFiles(path);
-            var csProjFiles = files.Where(x => x.EndsWith(".csproj"));
+    var files = Directory.GetFiles(path);
+    var csProjFiles = files.Where(x => x.EndsWith(".csproj"));
 
-            foreach (var csProjFile in csProjFiles)
-                await ProcessNugetFileUpdate(csProjFile, host);
-        }
-        static async Task ProcessNugetFileUpdate(string path,  IHost host)
-        {
-            if (!File.Exists(path))
-                return;
-    
-            var allContent = await File.ReadAllTextAsync(path);
-    
-            var newContent = await (Get<NugetPackageService>(host)?.UpdatePackagesInFile(allContent, path.Split(Constants.DefaultUrlSlash).LastOrDefault()) ??  Task.FromResult(allContent));
-
-            await File.WriteAllTextAsync(path, newContent);
-        }
-   
-        static TService Get<TService>(IHost host)
-            where TService : notnull =>
-            host.Services.GetRequiredService<TService>();
-    }
+    foreach (var csProjFile in csProjFiles)
+        await ProcessNugetFileUpdate(csProjFile, host);
 }
+static async Task ProcessNugetFileUpdate(string path,  IHost host)
+{
+    if (!File.Exists(path))
+        return;
+    
+    var allContent = await File.ReadAllTextAsync(path);
+    
+    var newContent = await (Get<NugetPackageService>(host)?.UpdatePackagesInFile(allContent, path.Split(Constants.DefaultUrlSlash).LastOrDefault()) ??  Task.FromResult(allContent));
 
+    await File.WriteAllTextAsync(path, newContent);
+}
+   
+static TService Get<TService>(IHost host)
+    where TService : notnull =>
+    host.Services.GetRequiredService<TService>();
 
 
 
