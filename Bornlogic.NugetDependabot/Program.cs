@@ -5,16 +5,20 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 
-HostApplicationBuilder builder = Host.CreateApplicationBuilder(args);
+[STAThread]
+static async Task Main(string[] args)
+{
+    HostApplicationBuilder builder = Host.CreateApplicationBuilder(args);
 
-builder.Logging.ClearProviders();
-builder.Logging.AddConsole();
-builder.Services.ConfigureServices(args);
+    builder.Logging.ClearProviders();
+    builder.Logging.AddConsole();
+    builder.Services.ConfigureServices(args);
 
-using IHost host = builder.Build();
+    using IHost host = builder.Build();
 
-await FindDirectoriesAndUpdatePackages(Constants.DefaultDirectory, host);
-await host.RunAsync();
+    await FindDirectoriesAndUpdatePackages(Constants.DefaultDirectory, host);
+    await host.RunAsync();
+}
 
 static async Task FindDirectoriesAndUpdatePackages(string path,  IHost host)
 {
