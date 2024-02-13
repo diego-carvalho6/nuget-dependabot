@@ -20,3 +20,8 @@ outputs:
 runs:
   using: 'docker'
   image:  Dockerfile
+  args:
+    - '-n'
+    - ${{ inputs.nuget-source }}
+    - '-a'
+    - ${{ inputs.allowed-sources }}

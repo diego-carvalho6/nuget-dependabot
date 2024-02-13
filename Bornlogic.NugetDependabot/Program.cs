@@ -1,4 +1,5 @@
-﻿using Bornlogic.NugetDependabot;
+﻿using System.Text;
+using Bornlogic.NugetDependabot;
 using Bornlogic.NugetDependabot.Entities;
 using Bornlogic.NugetDependabot.Services;
 using Microsoft.Extensions.DependencyInjection;
@@ -20,6 +21,7 @@ static class Program
         using IHost host = builder.Build();
 
         await FindDirectoriesAndUpdatePackages(Constants.DefaultDirectory, host);
+        
         await host.RunAsync();
     }
 

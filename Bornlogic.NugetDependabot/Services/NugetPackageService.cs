@@ -178,5 +178,20 @@ public class NugetPackageService
         return lastReference;
     }
 
+    public void SetUpdatedGithubEnv()
+    {
+        var gitHubOutputFile = Environment.GetEnvironmentVariable("GITHUB_OUTPUT");
+        if (!string.IsNullOrWhiteSpace(gitHubOutputFile))
+        {
+            var detailsMessage = _packages.Any()
+                ? $"\nUpdated Packages: \n {string.Join("\n", _packages.Select(x => $"Name: {x.GetPackageName()} Version: {x.GetVersionComparator()}"))}"
+                : $"\nNo Packages Updated \n";
+            
+            using StreamWriter textWriter = new(gitHubOutputFile, true, Encoding.UTF8);
+            textWriter.WriteLine($"summary-title=Updated {_packages.Count} Packages");
+            textWriter.WriteLine($"summary-details={detailsMessage}");
+        }
+    }
+
     private string CleanDirtInString(string value) => _invalidValuesToRemove.Replace(value, string.Empty);
 }
