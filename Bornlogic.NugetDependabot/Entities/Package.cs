@@ -35,6 +35,11 @@ public class Package
     {
         return string.IsNullOrWhiteSpace(PackageNugetVersion) ? PackageVersion :  PackageNugetVersion;
     }
+    
+    internal string GetVersionComparator()
+    {
+        return $"New {PackageNugetVersion ?? PackageVersion} <-> Older {PackageVersion}";
+    }
 
     internal bool HasUpdate() =>
         !string.IsNullOrWhiteSpace(PackageNugetVersion) && PackageNugetVersion != PackageVersion;

@@ -4,14 +4,11 @@ branding:
   icon: user-plus
   color: gray-dark
 inputs:
-  username:
-    description: 'The Nuget Username, for example: \"samples\".'
-    required: false
   nuget-source:
     description: 'The Nuget Source To Override, for example: \"https://api.nuget.org/v3/octorat/index.json\".'
     required: false
-  nuget-password:
-    description: 'The Nuget Password, for example: \"GHP_12345678\".'
+  allowed-sources:
+    description: 'The Nuget Packages Allowed Split By | , for example: \"microsoft*|MarkdownBuilder|aws-sdk*\'
     required: false
 outputs:
   summary-title:
@@ -23,10 +20,3 @@ outputs:
 runs:
   using: 'docker'
   image:  Bornlogic.NugetDependabot/Dockerfile
-  args:
-    - '-n'
-    - ${{ inputs.username }}
-    - '-n'
-    - ${{ inputs.nuget-source }}
-    - '-p'
-    - ${{ inputs.password }}

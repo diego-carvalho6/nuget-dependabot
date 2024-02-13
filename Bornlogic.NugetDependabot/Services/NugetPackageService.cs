@@ -45,12 +45,14 @@ public class NugetPackageService
         
         var sbContent = new StringBuilder(fileContent);
 
-        foreach (var package in packages.Where(x => x.HasUpdate()))
+        packages = packages.Where(x => x.HasUpdate()).ToList();
+        
+        foreach (var package in packages)
         foreach (var packageReference in package.GetSavedPackageReferences())
             sbContent.Replace(packageReference, package.ToNugetPackageReference());
         
-        _logger.LogInformation(packages.Any(x => x.HasUpdate())
-            ? $"Conclude update in file {fileName} \nUpdated Packages: /n {string.Join("/n", packages.Select(x => x.GetPackageName()))}"
+        _logger.LogInformation(packages.Any()
+            ? $"Conclude update in file {fileName} \nUpdated Packages: \n {string.Join("\n", packages.Select(x => $"Name: {x.GetPackageName()} Version: {x.GetVersionComparator()}"))}"
             : $"Conclude update in file {fileName} \nNo Packages Updated \n");
         
         return sbContent.ToString();
@@ -69,10 +71,10 @@ public class NugetPackageService
         if (string.IsNullOrWhiteSpace(includeValue) || string.IsNullOrWhiteSpace(versionValue))
             return new Package();
         
-        var parsedVersion = _invalidValuesToRemove.Replace(versionValue, string.Empty);
-        var parsedInclude = _invalidValuesToRemove.Replace(includeValue, string.Empty);
+        var parsedVersion = CleanDirtInString(versionValue);
+        var parsedInclude = CleanDirtInString(includeValue);
 
-        if (!IsAllowedPackage(includeValue))
+        if (!IsAllowedPackage(parsedInclude))
             return new Package();
         
         var semaphore = new SemaphoreSlim(1, 1);
@@ -144,7 +146,7 @@ public class NugetPackageService
             
         _logger.LogInformation($"GET Reference: {currentSourceUrl} In Public Source\n");
 
-        return await FindLastReferenceInNugetSource(currentSourceUrl);
+        return await FindLastReferenceInNugetSource(currentSourceUrl, notFoundFallbackMessage: "Not Found Package Reference In Public Source\n");
     }
 
     private async Task<string> FindLastReferenceInNugetSource(string sourceUrl, string authorization = null, string notFoundFallbackMessage = null, Func<Task<string>> notFoundAction = null)
@@ -156,10 +158,10 @@ public class NugetPackageService
 
         using HttpResponseMessage response = await Client.SendAsync(requestMessage);
         
-        if (response?.StatusCode == HttpStatusCode.NotFound && notFoundAction != null)
+        if (response?.StatusCode == HttpStatusCode.NotFound)
         {
             _logger.LogError($"{notFoundFallbackMessage}");
-            return await notFoundAction.Invoke();
+            return await (notFoundAction?.Invoke() ?? Task.FromResult(string.Empty));
         }
         
         response.EnsureSuccessStatusCode();
@@ -175,4 +177,6 @@ public class NugetPackageService
 
         return lastReference;
     }
+
+    private string CleanDirtInString(string value) => _invalidValuesToRemove.Replace(value, string.Empty);
 }

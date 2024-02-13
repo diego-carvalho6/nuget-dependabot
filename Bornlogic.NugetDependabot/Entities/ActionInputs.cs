@@ -5,7 +5,7 @@ namespace Bornlogic.NugetDependabot.Entities;
 public class ActionInputs
 {
     private string _nugetSource;
-    private string _allowed;
+    private string _allowedSources;
     
     [Option('n', "nuget-source",
         Required = false,
@@ -15,13 +15,13 @@ public class ActionInputs
         get => _nugetSource;
         set => ParseAndAssign(value, str => _nugetSource = str);
     }
-    [Option('a', "allowed",
+    [Option('a', "allowed-sources",
         Required = false,
-        HelpText = "The Nuget Packages Allowed, for example: \"microsoft*|azure*|aws-sdk*\".")]
-    public string Allowed
+        HelpText = "The Nuget Packages Allowed Split By | , for example: \"microsoft*|MarkdownBuilder|aws-sdk*\".")]
+    public string AllowedSources
     {
-        get => _allowed;
-        set => ParseAndAssign(value, str => _allowed = str);
+        get => _allowedSources;
+        set => ParseAndAssign(value, str => _allowedSources = str);
     }
     
     static void ParseAndAssign(string? value, Action<string> assign)

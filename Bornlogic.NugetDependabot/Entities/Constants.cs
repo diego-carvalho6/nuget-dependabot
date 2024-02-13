@@ -14,8 +14,6 @@ public static class Constants
     public const string DefaultIndexJsonValue = "index.json";
     public const string DefaultAllowedSeparator = "|";
     public const string DefaultWildCardValue = "*";
-    public const string BasicHeader = "Basic ";
-    public const string AuthorizationHeader = "Authorization";
-    public const string NugetValidType = "catalog:CatalogPage";
+    public const string BasicHeader = "Basic";
     public const string DefaultVersionSeparator = ".";
 }
