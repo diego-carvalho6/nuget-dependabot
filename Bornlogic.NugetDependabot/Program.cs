@@ -27,35 +27,57 @@ static class Program
 
     static async Task FindDirectoriesAndUpdatePackages(string path, IHost host)
     {
-        var directories = Directory.GetDirectories(path);
+        try
+        {
+            var defaultOptions = new EnumerationOptions()
+            {
+                AttributesToSkip = FileAttributes.Hidden | FileAttributes.Encrypted | FileAttributes.NotContentIndexed | FileAttributes.IntegrityStream | FileAttributes.ReparsePoint | FileAttributes.SparseFile | FileAttributes.Archive | FileAttributes.Compressed |
+                                   FileAttributes.Offline | FileAttributes.System | FileAttributes.Temporary,
+                IgnoreInaccessible = true,
+            };
+            
+            var directories = Directory.GetDirectories(path, Constants.DefaultWildCardValue,
+                enumerationOptions: defaultOptions );
 
-        var publicDirectories = directories.Where(x =>
-            !x.Split(Constants.DefaultUrlSlash)?.LastOrDefault().StartsWith(Constants.DefaultHiddenDirectoryPrefix) ??
-            false);
+            foreach (var directory in directories)
+                await FindDirectoriesAndUpdatePackages(directory, host);
+            
+            var files = Directory.GetFiles(path, "*csproj", defaultOptions);
 
-        foreach (var directory in publicDirectories)
-            await FindDirectoriesAndUpdatePackages(directory, host);
-
-        var files = Directory.GetFiles(path);
-        var csProjFiles = files.Where(x => x.EndsWith(".csproj"));
-
-        foreach (var csProjFile in csProjFiles)
-            await ProcessNugetFileUpdate(csProjFile, host);
+            foreach (var csProjFile in files)
+                await ProcessNugetFileUpdate(csProjFile, host);
+        
+        }
+        catch (Exception e)
+        {
+            var logger = Get<ILogger<NugetPackageService>>(host);
+            logger.LogError($"Failed To Read Files In Directory {path}. Error: {e.Message}" );   
+        }
+       
     }
 
     static async Task ProcessNugetFileUpdate(string path, IHost host)
     {
-        if (!File.Exists(path))
-            return;
+        try
+        {
+            if (!File.Exists(path))
+                return;
 
-        var allContent = await File.ReadAllTextAsync(path);
+            var allContent = await File.ReadAllTextAsync(path);
 
-        var newContent =
-            await (Get<NugetPackageService>(host)
-                       ?.UpdatePackagesInFile(allContent, path.Split(Constants.DefaultUrlSlash).LastOrDefault()) ??
-                   Task.FromResult(allContent));
-
-        await File.WriteAllTextAsync(path, newContent);
+            var newContent =
+                await (Get<NugetPackageService>(host)
+                           ?.UpdatePackagesInFile(allContent, path.Split(Constants.DefaultUrlSlash).LastOrDefault()) ??
+                       Task.FromResult(allContent));
+            
+            await File.WriteAllTextAsync(path, newContent);
+        }
+        catch (Exception e)
+        {
+            var logger = Get<ILogger<NugetPackageService>>(host);
+            logger.LogError($"Failed To Update File {path}. Error: {e.Message}" );   
+        }
+       
     }
 
     static TService Get<TService>(IHost host)
