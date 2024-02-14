@@ -17,7 +17,7 @@ public static class Startup
         
         services.Configure<NugetOptions>(options =>
         {
-            options.ConfigureOptions(parser?.Value?.NugetSource, Environment.GetEnvironmentVariable("USERNAME"), Environment.GetEnvironmentVariable("PASSWORD"), parser?.Value?.AllowedSources);
+            options.ConfigureOptions(parser?.Value?.NugetSource, Environment.GetEnvironmentVariable("USERNAME"), Environment.GetEnvironmentVariable("PASSWORD"), parser?.Value?.AllowedSources, parser.Value.UpdateType);
         });
         services.Configure<DirectoryOptions>(options =>
         {

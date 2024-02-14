@@ -5,6 +5,7 @@ using System.Text;
 using System.Text.RegularExpressions;
 using Bornlogic.NugetDependabot.Entities;
 using Bornlogic.NugetDependabot.Entities.Configuration;
+using Bornlogic.NugetDependabot.Entities.Enums;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
@@ -91,7 +92,7 @@ public class NugetPackageService
             return savedPackage;
         }
     
-        var nugetPackageVersion = await TryFindNugetPackageLastVersion(parsedInclude);
+        var nugetPackageVersion = await TryFindNugetPackageLastVersion(parsedInclude, parsedVersion);
 
         var newPackage = new Package(value, parsedInclude, parsedVersion, nugetPackageVersion);
     
@@ -116,13 +117,13 @@ public class NugetPackageService
                 : x.Equals(packageName, StringComparison.InvariantCultureIgnoreCase));
     }
 
-    private async Task<string> TryFindNugetPackageLastVersion(string packageName)
+    private async Task<string> TryFindNugetPackageLastVersion(string packageName, string packageVersion)
     {
         try
         {
             var isDefaultSource = _nugetOptions.GetNugetSource().Equals(Constants.DefaultNugetSource);
             
-            return isDefaultSource ? await GetLastReferenceInPublicNugetSource(packageName) :await GetLastReferenceInPrivateNugetSource(packageName);
+            return isDefaultSource ? await GetLastReferenceInPublicNugetSource(packageName, packageVersion) :await GetLastReferenceInPrivateNugetSource(packageName, packageVersion);
         }
         catch (HttpRequestException e)
         {
@@ -132,26 +133,26 @@ public class NugetPackageService
         return string.Empty;
     }
 
-    private async Task<string> GetLastReferenceInPrivateNugetSource(string packageName)
+    private async Task<string> GetLastReferenceInPrivateNugetSource(string packageName, string packageVersion)
     {
         var currentSourceUrl = $"{_nugetOptions.GetNugetSource().Clone()}{packageName}{Constants.DefaultUrlSlash}{Constants.DefaultIndexJsonValue}".ToLower();
             
         _logger.LogInformation($"GET Reference: {currentSourceUrl} In Private Source.\n");
 
-        return await FindLastReferenceInNugetSource(currentSourceUrl,  _nugetOptions.GetBasicAuth(),
+        return await FindLastReferenceInNugetSource(currentSourceUrl, packageVersion, _nugetOptions.GetBasicAuth(),
             "Not Found Package Reference In Private Source Trying To Search In Public Source.\n",
-            () => GetLastReferenceInPublicNugetSource(packageName));
+            () => GetLastReferenceInPublicNugetSource(packageName, packageVersion));
     }
-    private async Task<string> GetLastReferenceInPublicNugetSource(string packageName)
+    private async Task<string> GetLastReferenceInPublicNugetSource(string packageName, string packageVersion)
     {
         var currentSourceUrl = $"{Constants.DefaultNugetSource}{Constants.DefaultNugetRegistry}{Constants.DefaultUrlSlash}{packageName}{Constants.DefaultUrlSlash}{Constants.DefaultIndexJsonValue}".ToLower();
             
         _logger.LogInformation($"GET Reference: {currentSourceUrl} In Public Source\n");
 
-        return await FindLastReferenceInNugetSource(currentSourceUrl, notFoundFallbackMessage: "Not Found Package Reference In Public Source\n");
+        return await FindLastReferenceInNugetSource(currentSourceUrl, packageVersion, notFoundFallbackMessage: "Not Found Package Reference In Public Source\n");
     }
 
-    private async Task<string> FindLastReferenceInNugetSource(string sourceUrl, string authorization = null, string notFoundFallbackMessage = null, Func<Task<string>> notFoundAction = null)
+    private async Task<string> FindLastReferenceInNugetSource(string sourceUrl, string packageVersion, string authorization = null, string notFoundFallbackMessage = null, Func<Task<string>> notFoundAction = null)
     {
         _logger.LogInformation($"GET Url: {sourceUrl}\n");
         using HttpRequestMessage requestMessage = new HttpRequestMessage(HttpMethod.Get, sourceUrl);
@@ -170,8 +171,8 @@ public class NugetPackageService
         response.EnsureSuccessStatusCode();
             
         var responseBody =  JsonConvert.DeserializeObject<NugetListResponse>((await response.Content.ReadAsStringAsync()) ?? string.Empty);
-
-        var lastReference = NugetParser.ReturnGreater(responseBody?.Items?.Select(x => x?.Upper));
+        
+        var lastReference = NugetParser.GetVersionByNugetType(responseBody, packageVersion, _nugetOptions.GetAllowedUpdateType());
             
         if (!string.IsNullOrWhiteSpace(lastReference))
             _logger.LogInformation($"GET Success. {sourceUrl} Last Reference: {lastReference} \n\n");

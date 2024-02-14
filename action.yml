@@ -7,8 +7,12 @@ inputs:
   nuget-source:
     description: 'The Nuget Source To Override, for example: \"https://api.nuget.org/v3/octorat/index.json\".'
     required: false
+  update-type:
+    description: 'The Versioning Type To Update, for example: \"major\" or \"patch\" or \"all\" or \"minor\".'
+    required: false
+    default: "all"
   allowed-sources:
-    description: 'The Nuget Packages Allowed Split By | , for example: \"microsoft*|MarkdownBuilder|aws-sdk*\'
+    description: 'The Nuget Packages Allowed Split By | , for example: \"microsoft*|MarkdownBuilder|aws-sdk*\"'
     required: false
   workdir:
     description: 'The workspace directory.'
@@ -34,3 +38,5 @@ runs:
     - ${{ inputs.workdir }}
     - '-l'
     - ${{ inputs.log-file-name }}
+    - '-u'
+    - ${{ inputs.update-type }}

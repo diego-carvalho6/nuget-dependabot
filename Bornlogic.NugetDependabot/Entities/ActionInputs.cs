@@ -31,6 +31,10 @@ public class ActionInputs
         Required = false,
         HelpText = "The Log File Name.")]
     public string LogFileName { get; set; } = null!;
+    [Option('u', "update-type",
+        Required = false,
+        HelpText = "The Versioning Type To Update, for example: \"major\" or \"patch\" or \"all\" or \"minor\".")]
+    public string UpdateType { get; set; } = null!;
     static void ParseAndAssign(string? value, Action<string> assign)
     {
         if (value is { Length: > 0 } && assign is not null)
