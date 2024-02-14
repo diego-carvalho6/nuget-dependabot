@@ -98,21 +98,17 @@ public class DirectoryService
         }
 
         string path = _directoryOptions.GetLogFileName();
-        var fileContent = string.Empty;
         var insertData = $"Update Dependencies \nCount: {packages.Count} \nAt: {DateTime.UtcNow:yy-MM-dd} \n\n";
-
         
         if (File.Exists(path))
         {
-            using var reader = new StreamReader(path);
-            fileContent = await reader.ReadToEndAsync();
-            File.Delete(path);
-            reader.Dispose();
+            string oldText = File.ReadAllText(path);
+            using (var sw = new StreamWriter(path, false))
+            {
+                sw.Write(insertData);
+                sw.Write(oldText);
+            }
         }
-        else
-            File.Create(path);
-
-        using var writer = new StreamWriter(path, false);
-        writer.Write(insertData + fileContent);
+        else File.WriteAllText(path,insertData);
     }
 }
