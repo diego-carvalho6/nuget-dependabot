@@ -153,7 +153,7 @@ public class NugetPackageService
 
     private async Task<string> FindLastReferenceInNugetSource(string sourceUrl, string authorization = null, string notFoundFallbackMessage = null, Func<Task<string>> notFoundAction = null)
     {
-        _logger.LogInformation($"GET Url: {sourceUrl}");
+        _logger.LogInformation($"GET Url: {sourceUrl}\n");
         using HttpRequestMessage requestMessage = new HttpRequestMessage(HttpMethod.Get, sourceUrl);
             
         if (!string.IsNullOrWhiteSpace(authorization))
