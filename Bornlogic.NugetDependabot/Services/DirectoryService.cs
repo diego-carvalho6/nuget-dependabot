@@ -89,12 +89,15 @@ public class DirectoryService
         var gitHubOutputFile = Environment.GetEnvironmentVariable("GITHUB_OUTPUT");
         if (!string.IsNullOrWhiteSpace(gitHubOutputFile))
         {
-            var detailsMessage = packages.Any() ? $"{string.Join("|", packages.Select(x => $" {x.GetPackageName()} {x.GetVersionComparator()} "))}"
+            var prefix = "<h1>Packages Updated:</h1> <ul>";
+            var sufix = "</ul>";
+            
+            var detailsMessage = packages.Any() ? $"{string.Join("", packages.Select(x => $"<li> {x.GetPackageName()}: {x.GetVersionComparator()} </li>" ))}"
                 : $"No Packages Updated";
             
             using StreamWriter textWriter = new(gitHubOutputFile, true, Encoding.UTF8);
             textWriter.WriteLine($"title=Updated-{packages.Count()}-Packages-At-{DateTime.UtcNow:yy-MM-dd}");
-            textWriter.WriteLine($"details={detailsMessage}");
+            textWriter.WriteLine($"details={prefix}{detailsMessage}{sufix}");
         }
 
         string path = _directoryOptions.GetLogFileName();
