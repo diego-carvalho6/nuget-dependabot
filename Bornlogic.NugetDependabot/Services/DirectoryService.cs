@@ -1,6 +1,7 @@
 using Bornlogic.NugetDependabot.Entities;
 using Bornlogic.NugetDependabot.Entities.Configuration;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 
 namespace Bornlogic.NugetDependabot.Services;
 
@@ -10,9 +11,9 @@ public class DirectoryService
     private readonly NugetPackageService _nugetPackageService;
     private readonly ILogger _logger;
 
-    public DirectoryService(DirectoryOptions directoryOptions, NugetPackageService nugetPackageService, ILogger logger)
+    public DirectoryService(IOptions<DirectoryOptions> directoryOptions, NugetPackageService nugetPackageService, ILogger logger)
     {
-        _directoryOptions = directoryOptions;
+        _directoryOptions = directoryOptions.Value;
         _nugetPackageService = nugetPackageService;
         _logger = logger;
     }
