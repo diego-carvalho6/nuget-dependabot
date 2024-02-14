@@ -9,7 +9,7 @@ public class DirectoryOptions
 
     internal void ConfigureOptions(string workdir, string logFileName)
     {
-        _workdir = workdir ?? Constants.DefaultDirectory;
-        _logFileName = logFileName ?? Constants.DefaultLogFileName;
+        _workdir = !string.IsNullOrWhiteSpace(workdir) ? workdir : Constants.DefaultDirectory;
+        _logFileName = !string.IsNullOrWhiteSpace(logFileName) ? logFileName : Constants.DefaultLogFileName;
     }
 }
