@@ -107,12 +107,11 @@ public class DirectoryService
             using StreamReader reader = new StreamReader(path);
             fileContent = await reader.ReadToEndAsync();
             File.Delete(path);
-           
         }
         else
             File.Create(path);
 
-        await using StreamWriter writer = new StreamWriter(path, false);
-        await writer.WriteAsync(insertData + Environment.NewLine + fileContent);
+        using StreamWriter writer = new StreamWriter(path, false);
+        writer.Write(insertData + fileContent);
     }
 }
