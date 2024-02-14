@@ -93,7 +93,7 @@ public class DirectoryService
                 : $"\nNo Packages Updated \n";
             
             using StreamWriter textWriter = new(gitHubOutputFile, true, Encoding.UTF8);
-            textWriter.WriteLine($"title=Updated {packages.Count()} Packages");
+            textWriter.WriteLine($"title=Updated-{packages.Count()}-Packages");
             textWriter.WriteLine($"details={detailsMessage}");
         }
 
