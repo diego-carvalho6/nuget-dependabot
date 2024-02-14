@@ -10,7 +10,7 @@ inputs:
   allowed-sources:
     description: 'The Nuget Packages Allowed Split By | , for example: \"microsoft*|MarkdownBuilder|aws-sdk*\'
     required: false
-  workspace:
+  workdir:
     description: 'The workspace directory.'
     required: false
     default: '/'
@@ -30,4 +30,4 @@ runs:
     - '-a'
     - ${{ inputs.allowed-sources }}
     - '--workdir'
-    - ${{ inputs.workspace }}
+    - ${{ inputs.workdir }}
