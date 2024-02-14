@@ -24,7 +24,7 @@ public class ActionInputs
         set => ParseAndAssign(value, str => _allowedSources = str);
     }
     [Option('w', "workdir",
-        Required = true,
+        Required = false,
         HelpText = "The workspace directory, or repository root directory.")]
     public string WorkspaceDirectory { get; set; } = null!;
     
