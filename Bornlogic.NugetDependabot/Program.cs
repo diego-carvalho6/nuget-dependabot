@@ -23,6 +23,7 @@ static class Program
         await Get<DirectoryService>(host)
             ?.FindDirectoriesAndUpdatePackages();
         
+        Environment.Exit(0);
         await host.RunAsync();
     }
 
