@@ -1,4 +1,4 @@
-name: 'Bornlogic Nuget Dependabot'
+name: 'Nuget Dependabot'
 description: 'A Github action deal with updates in csproj nuget package dependencies.'
 branding:
   icon: user-plus
