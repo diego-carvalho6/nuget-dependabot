@@ -82,7 +82,7 @@ public class DirectoryService
 
         if (!packages.Any())
         {
-            _logger.LogInformation("No Packages To Update, Skipping Log File");
+            _logger.LogInformation("\nNo Packages To Update, Skipping Log File\n");
             return;
         }
         
