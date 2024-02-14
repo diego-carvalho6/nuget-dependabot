@@ -97,15 +97,20 @@ public class DirectoryService
             textWriter.WriteLine($"details={detailsMessage}");
         }
 
+        string path = Directory.GetCurrentDirectory() + _directoryOptions.GetLogFileName();
+        string str;
         var insertData = $"Update Dependencies \nCount: {packages.Count} \nAt: {DateTime.UtcNow:yy-MM-dd} \n\n";
-        
-        using var fileStream = File.OpenWrite(_directoryOptions.GetLogFileName());
 
-        var buffer = new byte[fileStream.Length];
-        fileStream.Position = 0;
-        var data = Encoding.Unicode.GetBytes(insertData);
-        fileStream.SetLength(buffer.Length + data.Length);
-        fileStream.Write(data, 0, data.Length);
-        fileStream.Write(buffer, 0, buffer.Length);
+        using (StreamReader sreader = new StreamReader(path)) {
+            str = sreader.ReadToEnd();
+        }
+
+        File.Delete(path);
+
+        using (StreamWriter swriter = new StreamWriter(path, false))
+        {
+            str = insertData + str;
+            swriter.Write(str);
+        }
     }
 }
