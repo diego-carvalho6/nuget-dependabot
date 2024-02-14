@@ -15,4 +15,5 @@ public static class Constants
     public const string DefaultWildCardValue = "*";
     public const string BasicHeader = "Basic";
     public const string DefaultVersionSeparator = ".";
+    public const string DefaultLogFileName = "PACKAGES_CHANGELOG";
 }

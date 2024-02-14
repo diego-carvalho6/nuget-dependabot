@@ -20,8 +20,7 @@ static class Program
 
         using IHost host = builder.Build();
 
-        await Get<DirectoryService>(host)
-            ?.FindDirectoriesAndUpdatePackages();
+        await Get<DirectoryService>(host)?.FindDirectoriesAndUpdatePackages();
         
         Environment.Exit(0);
         await host.RunAsync();

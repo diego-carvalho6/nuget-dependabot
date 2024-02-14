@@ -57,6 +57,8 @@ public class NugetPackageService
         
         return sbContent.ToString();
     }
+
+    public List<Package> GetUpdatedPackages() => _packages.Where(x => x.HasUpdate()).ToList();
     
     private async Task<Package> GetPackageSpecs(string value)
     {
@@ -179,22 +181,7 @@ public class NugetPackageService
         return lastReference;
     }
 
-    public void SetUpdatedGithubEnv()
-    {
-        var gitHubOutputFile = Environment.GetEnvironmentVariable("GITHUB_OUTPUT");
-        if (!string.IsNullOrWhiteSpace(gitHubOutputFile))
-        {
-            var packages = _packages.Where(x => x.HasUpdate());
-            
-            var detailsMessage = packages.Any()
-                ? $"\nUpdated Packages: \n {string.Join("\n", packages.Select(x => $"Name: {x.GetPackageName()} Version: {x.GetVersionComparator()}"))}"
-                : $"\nNo Packages Updated \n";
-            
-            using StreamWriter textWriter = new(gitHubOutputFile, true, Encoding.UTF8);
-            textWriter.WriteLine($"summary-title=Updated {packages.Count()} Packages");
-            textWriter.WriteLine($"summary-details={detailsMessage}");
-        }
-    }
+  
 
     private string CleanDirtInString(string value) => _invalidValuesToRemove.Replace(value, string.Empty);
 }

@@ -21,7 +21,7 @@ public static class Startup
         });
         services.Configure<DirectoryOptions>(options =>
         {
-            options.ConfigureOptions(parser?.Value?.WorkspaceDirectory);
+            options.ConfigureOptions(parser?.Value?.WorkspaceDirectory, parser?.Value?.LogFileName);
         });
 
         services.AddSingleton<NugetPackageService>();
