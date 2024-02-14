@@ -4,4 +4,4 @@ RUN dotnet publish "Bornlogic.NugetDependabot/Bornlogic.NugetDependabot.csproj" 
 
 FROM mcr.microsoft.com/dotnet/sdk:8.0
 COPY --from=publish /out .
-ENTRYPOINT ["dotnet", "Bornlogic.NugetDependabot.dll"]
+ENTRYPOINT ["dotnet", "/Bornlogic.NugetDependabot.dll"]
