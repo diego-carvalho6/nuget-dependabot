@@ -9,9 +9,9 @@ public class DirectoryService
 {
     private readonly DirectoryOptions _directoryOptions;
     private readonly NugetPackageService _nugetPackageService;
-    private readonly ILogger _logger;
+    private readonly ILogger<DirectoryService> _logger;
 
-    public DirectoryService(IOptions<DirectoryOptions> directoryOptions, NugetPackageService nugetPackageService, ILogger logger)
+    public DirectoryService(IOptions<DirectoryOptions> directoryOptions, NugetPackageService nugetPackageService, ILogger<DirectoryService> logger)
     {
         _directoryOptions = directoryOptions.Value;
         _nugetPackageService = nugetPackageService;
