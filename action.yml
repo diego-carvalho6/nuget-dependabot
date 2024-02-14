@@ -14,13 +14,14 @@ inputs:
     description: 'The workspace directory.'
     required: false
     default: '/'
+  log-file-name:
+    description: 'The log file name.'
+    required: false
 outputs:
-  summary-title:
+  title:
     description: 'The title of the code metrics action.'
-  summary-details:
+  details:
     description: 'A detailed summary of all the projects that were flagged.'
-  updated-metrics:
-    description: 'A boolean value, indicating whether or not the CODE_METRICS.md was updated as a result of running this action.'
 runs:
   using: 'docker'
   image:  Dockerfile
@@ -31,3 +32,5 @@ runs:
     - ${{ inputs.allowed-sources }}
     - '-w'
     - ${{ inputs.workdir }}
+    - '-l'
+    - ${{ inputs.log-file-name }}

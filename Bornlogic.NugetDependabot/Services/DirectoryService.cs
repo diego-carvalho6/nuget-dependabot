@@ -93,8 +93,8 @@ public class DirectoryService
                 : $"\nNo Packages Updated \n";
             
             using StreamWriter textWriter = new(gitHubOutputFile, true, Encoding.UTF8);
-            textWriter.WriteLine($"summary-title=Updated {packages.Count()} Packages");
-            textWriter.WriteLine($"summary-details={detailsMessage}");
+            textWriter.WriteLine($"title=Updated {packages.Count()} Packages");
+            textWriter.WriteLine($"details={detailsMessage}");
         }
 
         var insertData = $"Update Dependencies \nCount: {packages.Count} \nAt: {DateTime.UtcNow:yy-MM-dd} \n\n";
