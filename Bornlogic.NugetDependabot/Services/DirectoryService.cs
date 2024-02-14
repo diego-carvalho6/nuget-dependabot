@@ -89,7 +89,7 @@ public class DirectoryService
         var gitHubOutputFile = Environment.GetEnvironmentVariable("GITHUB_OUTPUT");
         if (!string.IsNullOrWhiteSpace(gitHubOutputFile))
         {
-            var detailsMessage = packages.Any() ? $"{string.Join("\n", packages.Select(x => $"Name: {x.GetPackageName()} Version: {x.GetVersionComparator()}"))}"
+            var detailsMessage = packages.Any() ? $"{string.Join("\n", packages.Select(x => $"{x.GetPackageName()}-{x.GetVersionComparator(true)}"))}"
                 : $"No-Packages-Updated";
             
             using StreamWriter textWriter = new(gitHubOutputFile, true, Encoding.UTF8);
