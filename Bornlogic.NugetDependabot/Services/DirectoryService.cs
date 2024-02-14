@@ -89,7 +89,7 @@ public class DirectoryService
         var gitHubOutputFile = Environment.GetEnvironmentVariable("GITHUB_OUTPUT");
         if (!string.IsNullOrWhiteSpace(gitHubOutputFile))
         {
-            var detailsMessage = packages.Any() ? $"{string.Join("\n", packages.Select(x => $"{x.GetPackageName()}-{x.GetVersionComparator(true)}"))}"
+            var detailsMessage = packages.Any() ? $"{string.Join("\n", packages.Select(x => $"Name: {x.GetPackageName()} Version: {x.GetVersionComparator()}"))}"
                 : $"No-Packages-Updated";
             
             using StreamWriter textWriter = new(gitHubOutputFile, true, Encoding.UTF8);
@@ -97,7 +97,7 @@ public class DirectoryService
             textWriter.WriteLine($"details={detailsMessage}");
         }
 
-        string path = Directory.GetCurrentDirectory() + _directoryOptions.GetLogFileName();
+        string path = _directoryOptions.GetLogFileName();
         string str;
         var insertData = $"Update Dependencies \nCount: {packages.Count} \nAt: {DateTime.UtcNow:yy-MM-dd} \n\n";
 
@@ -109,7 +109,7 @@ public class DirectoryService
 
         using (StreamWriter swriter = new StreamWriter(path, false))
         {
-            str = insertData + str;
+            str = insertData + Environment.NewLine + str;
             swriter.Write(str);
         }
     }
