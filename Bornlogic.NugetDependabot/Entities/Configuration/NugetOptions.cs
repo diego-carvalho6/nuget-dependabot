@@ -24,8 +24,7 @@ public class NugetOptions
         _allowedPackages = allowedPackages?.Split(Constants.DefaultAllowedSeparator)?.ToList() ?? new List<string>();
         if (!string.IsNullOrWhiteSpace(username) && !string.IsNullOrWhiteSpace(password))
             _basicToken = Convert.ToBase64String(Encoding.ASCII.GetBytes(username + ":" + password));
-        // _updateType = nugetValidUpdateTypes.FirstOrDefault(x => updateType.Equals(x.ToString(), StringComparison.InvariantCultureIgnoreCase));
-        _updateType = NugetVersionUpdateType.Major;
+        _updateType = nugetValidUpdateTypes.FirstOrDefault(x => updateType.Equals(x.ToString(), StringComparison.InvariantCultureIgnoreCase));
     }
     
     
