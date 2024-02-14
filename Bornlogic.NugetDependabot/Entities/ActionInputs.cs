@@ -32,7 +32,11 @@ public class ActionInputs
     {
         if (value is { Length: > 0 } && assign is not null)
         {
-            assign(string.Join("/",value.Split("/").Skip(1)));
+            if (value.StartsWith("/"))
+                assign(string.Join('',value.Split('').Skip(1)));
+            else
+                assign(value);
+            
         }
     }
     
