@@ -90,7 +90,7 @@ public class DirectoryService
         if (!string.IsNullOrWhiteSpace(gitHubOutputFile))
         {
             var detailsMessage = packages.Any() ? $"{string.Join("|", packages.Select(x => $" {x.GetPackageName()} {x.GetVersionComparator()} "))}"
-                : $"No-Packages-Updated";
+                : $"No Packages Updated";
             
             using StreamWriter textWriter = new(gitHubOutputFile, true, Encoding.UTF8);
             textWriter.WriteLine($"title=Updated-{packages.Count()}-Packages-At-{DateTime.UtcNow:yy-MM-dd}");
@@ -104,14 +104,15 @@ public class DirectoryService
         
         if (File.Exists(path))
         {
-            using StreamReader reader = new StreamReader(path);
+            using var reader = new StreamReader(path);
             fileContent = await reader.ReadToEndAsync();
             File.Delete(path);
+            reader.Dispose();
         }
         else
             File.Create(path);
 
-        using StreamWriter writer = new StreamWriter(path, false);
+        using var writer = new StreamWriter(path, false);
         writer.Write(insertData + fileContent);
     }
 }
