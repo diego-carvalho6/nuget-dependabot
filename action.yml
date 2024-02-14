@@ -29,5 +29,5 @@ runs:
     - ${{ inputs.nuget-source }}
     - '-a'
     - ${{ inputs.allowed-sources }}
-    - '--workdir'
+    - '-w'
     - ${{ inputs.workdir }}

@@ -17,10 +17,15 @@ public static class Startup
         
         services.Configure<NugetOptions>(options =>
         {
-            options.ConfigureOptions(parser?.Value?.NugetSource, Environment.GetEnvironmentVariable("USERNAME"), Environment.GetEnvironmentVariable("PASSWORD"));
+            options.ConfigureOptions(parser?.Value?.NugetSource, Environment.GetEnvironmentVariable("USERNAME"), Environment.GetEnvironmentVariable("PASSWORD"), parser?.Value?.AllowedSources);
+        });
+        services.Configure<DirectoryOptions>(options =>
+        {
+            options.ConfigureOptions(parser?.Value?.WorkspaceDirectory);
         });
 
         services.AddSingleton<NugetPackageService>();
+        services.AddSingleton<DirectoryService>();
 
         return services;
     }
