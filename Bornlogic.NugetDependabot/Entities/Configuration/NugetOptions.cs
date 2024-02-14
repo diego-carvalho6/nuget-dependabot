@@ -18,13 +18,14 @@ public class NugetOptions
     
     internal void ConfigureOptions(string nugetSource , string username , string password , string allowedPackages, string updateType)
     {
-        var nugetValidUpdateTypes = Enum.GetValuesAsUnderlyingType<NugetVersionUpdateType>().Cast<NugetVersionUpdateType>();
+        var nugetValidUpdateTypes = Enum.GetValues<NugetVersionUpdateType>();
         
         _nugetSource = nugetSource?.EndsWith(Constants.DefaultUrlSlash) ?? false ? nugetSource.Replace(Constants.DefaultIndexJsonValue + Constants.DefaultUrlSlash, string.Empty)  : nugetSource?.Replace(Constants.DefaultIndexJsonValue, string.Empty) ?? Constants.DefaultNugetSource;
         _allowedPackages = allowedPackages?.Split(Constants.DefaultAllowedSeparator)?.ToList() ?? new List<string>();
         if (!string.IsNullOrWhiteSpace(username) && !string.IsNullOrWhiteSpace(password))
             _basicToken = Convert.ToBase64String(Encoding.ASCII.GetBytes(username + ":" + password));
-        _updateType = nugetValidUpdateTypes.FirstOrDefault(x => updateType.Equals(x.ToString(), StringComparison.InvariantCultureIgnoreCase));
+        // _updateType = nugetValidUpdateTypes.FirstOrDefault(x => updateType.Equals(x.ToString(), StringComparison.InvariantCultureIgnoreCase));
+        _updateType = NugetVersionUpdateType.Major;
     }
     
     
