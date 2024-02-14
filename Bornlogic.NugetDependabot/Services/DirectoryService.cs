@@ -89,7 +89,7 @@ public class DirectoryService
         var gitHubOutputFile = Environment.GetEnvironmentVariable("GITHUB_OUTPUT");
         if (!string.IsNullOrWhiteSpace(gitHubOutputFile))
         {
-            var detailsMessage = packages.Any() ? $"{string.Join("|", packages.Select(x => $"{x.GetPackageName()} {x.GetVersionComparator()}"))}"
+            var detailsMessage = packages.Any() ? $"{string.Join("|", packages.Select(x => $" {x.GetPackageName()} {x.GetVersionComparator()} "))}"
                 : $"No-Packages-Updated";
             
             using StreamWriter textWriter = new(gitHubOutputFile, true, Encoding.UTF8);
@@ -98,19 +98,21 @@ public class DirectoryService
         }
 
         string path = _directoryOptions.GetLogFileName();
-        string str;
+        var fileContent = string.Empty;
         var insertData = $"Update Dependencies \nCount: {packages.Count} \nAt: {DateTime.UtcNow:yy-MM-dd} \n\n";
 
-        using (StreamReader sreader = new StreamReader(path)) {
-            str = sreader.ReadToEnd();
-        }
-
-        File.Delete(path);
-
-        using (StreamWriter swriter = new StreamWriter(path, false))
+        
+        if (File.Exists(path))
         {
-            str = insertData + Environment.NewLine + str;
-            swriter.Write(str);
+            using StreamReader reader = new StreamReader(path);
+            fileContent = await reader.ReadToEndAsync();
+            File.Delete(path);
+           
         }
+        else
+            File.Create(path);
+
+        await using StreamWriter writer = new StreamWriter(path, false);
+        await writer.WriteAsync(insertData + Environment.NewLine + fileContent);
     }
 }
